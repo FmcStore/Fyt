@@ -1,0 +1,8 @@
+{
+  "name": "yt-downloader-brutal",
+  "version": "1.0.0",
+  "main": "api/download.js",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
