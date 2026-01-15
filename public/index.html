@@ -59,38 +59,50 @@
     </div>
 
     <script>
-        async function download(type) {
-            const url = document.getElementById('urlInput').value;
-            if (!url) return alert('Enter URL!');
+  async function download(type) {
+    const urlInput = document.getElementById('urlInput');
+    const url = urlInput.value;
+    if (!url) return alert('Paste URL-nya dulu boss!');
 
-            const loader = document.getElementById('loader');
-            const result = document.getElementById('result');
-            
-            loader.classList.remove('hidden');
-            result.classList.add('hidden');
+    const loader = document.getElementById('loader');
+    const result = document.getElementById('result');
+    
+    loader.classList.remove('hidden');
+    result.classList.add('hidden');
 
-            try {
-                const response = await fetch('/api/download', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url, type })
-                });
+    try {
+        const response = await fetch('/api/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, type })
+        });
 
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-
-                document.getElementById('thumb').src = data.info.thumbnail;
-                document.getElementById('title').innerText = data.info.title;
-                document.getElementById('info').innerText = `${data.info.quality} | ${data.info.size} | ${data.info.uploader}`;
-                document.getElementById('downloadBtn').href = data.download;
-                
-                result.classList.remove('hidden');
-            } catch (err) {
-                alert('Error: ' + err.message);
-            } finally {
-                loader.classList.add('hidden');
-            }
+        // Cek jika response bukan JSON (seperti error 504 Vercel)
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Server sedang sibuk (Timeout). Coba klik lagi.");
         }
+
+        const data = await response.json();
+        
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+
+        document.getElementById('thumb').src = data.info.thumbnail;
+        document.getElementById('title').innerText = data.info.title;
+        document.getElementById('info').innerText = `${data.info.quality} | ${data.info.size}`;
+        document.getElementById('downloadBtn').href = data.download;
+        
+        result.classList.remove('hidden');
+    } catch (err) {
+        console.error(err);
+        alert('Error: ' + err.message);
+    } finally {
+        loader.classList.add('hidden');
+    }
+}
     </script>
 </body>
 </html>
